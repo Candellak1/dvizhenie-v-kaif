@@ -9,7 +9,7 @@
     community: 'https://vk.com/bud_v_forme35',
     communityMessage: 'https://vk.me/bud_v_forme35',
     alena: 'https://vk.me/alena_sokolova18',
-    freeWorkouts: 'https://vk.com/app5898182_-161088776'
+    bot: 'https://vk.me/club243362672'
   };
 
   var TERMS = {
@@ -29,11 +29,10 @@
       { n: 8, price: 25000, bonus: 'Доступ к онлайн-банку «зарядок здоровья» на полгода' }
     ],
     includes: [
-      'Полная диагностика тела: слабые места, напряжение, проблемы с подвижностью',
-      'Коррекция дисбаланса',
-      'Улучшение гибкости',
-      'Бережная растяжка',
-      'Силовая поддержка слабых зон'
+      'Коррекционные упражнения и работа с осанкой',
+      'Работа с дыханием при необходимости',
+      'Мягкая растяжка',
+      'Силовая часть'
     ],
     quote: 'Комплексная проработка всего за один час.'
   };
@@ -43,8 +42,7 @@
     id: 'online',
     title: 'Индивидуальная тренировка онлайн вживую',
     hour: 3000,
-    quote: 'Вы у себя дома, я вас направляю, учу двигаться правильно и корректирую.',
-    discount: { text: 'На онлайн-индивидуальные сейчас скидка 15%', note: 'актуальность скидки уточните у Алёны', verify: true }
+    quote: 'Вы у себя дома, я вас направляю, учу двигаться правильно и корректирую.'
   };
 
   var diagnostics = {
@@ -87,26 +85,16 @@
       { n: 3, price: 6000, access: '3 месяца' },
       { n: 4, price: 7900, access: '4 месяца' }
     ],
-    notes: ['Занимайся, когда и сколько хочешь.', 'Доступ всегда можно продлить.', 'Можно подарить: напишите Алёне.']
+    notes: ['Занимайся, когда и сколько хочешь.', 'Доступ всегда можно продлить.', 'Если хотите подарить программу, напишите мне.']
   };
 
-  // Программы без цены в данных: цену и состав не выводим как факт.
-  var otherPrograms = [
-    {
-      id: 'body',
-      title: 'Красивое и здоровое тело',
-      facts: ['3D-тренинг', '«Банк» из 16 тренировок по 35 минут', 'От простого к сложному', '«Никакой подготовки, только желание и немного свободного пространства»'],
-      price: null,
-      priceText: 'Цена по запросу'
-    },
-    {
-      id: 'stretch_bank',
-      title: 'Банк зарядок по растяжке',
-      facts: ['Онлайн-программа, чтобы научиться правильно тянуться'],
-      price: null,
-      priceText: 'Подробности у Алёны'
-    }
-  ];
+  var stretch = {
+    id: 'stretch',
+    title: 'Растяжка на всё тело',
+    price: 4555,
+    description: '10 домашних зарядок в записи. Растяжка для шеи и плеч, спины, рук, ног и корпуса и упражнения на раскрытие грудной клетки.',
+    equipment: 'Для занятий нужны место на полу и плед.'
+  };
 
   /* Её запросы (пост ноября 2026). programs — программы «аптечки» по теме;
      пустой список — готовой программы по теме нет, начинаем с диагностики.
@@ -119,13 +107,13 @@
     { id: 'sitting', label: 'Сидячая работа', programs: ['neck', 'posture'] },
     { id: 'gym', label: 'Растяжка после спортзала', programs: ['relax', 'lower'] },
     { id: 'posture', label: 'Исправить осанку', programs: ['posture'] },
-    { id: 'stretch', label: 'Научиться правильно тянуться', programs: ['relax'], extra: 'stretch_bank' },
+    { id: 'stretch', label: 'Научиться правильно тянуться', programs: ['relax'] },
     { id: 'move', label: 'Просто подвигаться без боли', programs: ['relax'], ours: true }
   ];
 
   var formats = [
     { id: 'in_person', label: 'Лично в Вологде', short: 'лично' },
-    { id: 'online', label: 'Онлайн вживую', hint: 'вы дома, Алёна направляет по видео', short: 'онлайн вживую' },
+    { id: 'online', label: 'Онлайн вживую', hint: 'вы дома, я направляю по видео', short: 'онлайн вживую' },
     { id: 'home', label: 'Выезд на дом', short: 'выезд на дом' },
     { id: 'recorded', label: 'В записи, когда удобно', short: 'в записи' }
   ];
@@ -139,6 +127,7 @@
     ],
     recorded: [
       { id: 'kit', label: 'Готовая программа', hint: '«Фитнес-аптечка»' },
+      { id: 'stretch', label: 'Растяжка на всё тело', hint: '10 зарядок в записи' },
       { id: 'personal', label: 'Зарядки под мой запрос', hint: 'персонально' }
     ]
   };
@@ -170,9 +159,18 @@
 
     if (fmt.id === 'recorded') {
       if (goalId === 'personal') return personalResult(r);
+      if (goalId === 'stretch') {
+        r.service = stretch.id;
+        r.title = stretch.title;
+        r.lead = stretch.description;
+        r.notes.push(stretch.equipment);
+        r.prices.push({ label: 'Доступ к программе', value: stretch.price });
+        r.prefill.service = stretch.title;
+        return r;
+      }
       if (!req.programs.length) {
         diagResult(r, fmt);
-        r.lead = 'Готовой программы в записи именно под этот запрос нет. Алёна записывает персональные зарядки ' + personal.basis + '.';
+        r.lead = 'Готовой программы в записи именно под этот запрос нет. Я записываю персональные зарядки ' + personal.basis + '.';
         r.prices.push({ label: personal.count + ' персональных зарядки в записи', value: personal.price, note: personal.access });
         r.prefill.service = diagnostics.title;
         return r;
@@ -190,9 +188,7 @@
       r.title = online.title;
       r.quote = online.quote;
       r.prices.push({ label: 'Час занятия', value: online.hour });
-      r.notes.push(online.discount.text + ' — ' + online.discount.note + '.');
-      if (goalId === 'course') r.notes.push('Пакеты в карточках указаны для очных тренировок. Про курс онлайн спросите Алёну.');
-      r.items = individual.includes.slice(1);
+      if (goalId === 'course') r.notes.push('Пакеты в карточках указаны для очных тренировок. Про курс онлайн спросите меня.');
     } else {
       r.service = individual.id;
       r.title = individual.title + (fmt.id === 'home' ? ' с выездом на дом' : ' лично');
@@ -207,9 +203,9 @@
           bonus: p.bonus || ''
         });
       });
-      if (fmt.id === 'home') r.notes.push(TERMS.home + ' Район и условия выезда Алёна подскажет при записи.');
+      if (fmt.id === 'home') r.notes.push(TERMS.home + ' Район и условия выезда подскажу при записи.');
     }
-    r.notes.unshift('По описанию Алёны, индивидуальные тренировки начинаются с диагностики всего тела (' + fmtRub(diagnostics.price) + ').');
+    r.notes.unshift('Я начинаю индивидуальные тренировки с диагностики всего тела (' + fmtRub(diagnostics.price) + ').');
     r.terms.push(TERMS.prepay);
     r.prefill.service = r.title;
     return r;
@@ -221,8 +217,8 @@
     r.quote = diagnostics.quote;
     r.items = diagnostics.includes.slice();
     r.prices.push({ label: 'Диагностика', value: diagnostics.price });
-    if (fmt.id === 'online') r.notes.push('Можно ли пройти диагностику онлайн, уточните у Алёны.');
-    if (fmt.id === 'home') r.notes.push(TERMS.home + ' Условия выезда Алёна подскажет при записи.');
+    if (fmt.id === 'online') r.notes.push('Можно ли пройти диагностику онлайн, уточните у меня.');
+    if (fmt.id === 'home') r.notes.push(TERMS.home + ' Условия выезда подскажу при записи.');
     r.terms.push(TERMS.prepay);
     r.prefill.service = diagnostics.title;
   }
@@ -231,7 +227,7 @@
     r.service = personal.id;
     r.title = 'Персональные зарядки под ваш запрос';
     r.quote = personal.quote;
-    r.lead = 'Алёна записывает ' + personal.count + ' зарядки ' + personal.basis + '. Они ' + personal.access + '.';
+    r.lead = 'Я записываю ' + personal.count + ' зарядки ' + personal.basis + '. Они ' + personal.access + '.';
     r.items = ['Диагностика всего тела', personal.count + ' персональные зарядки в записи'];
     r.prices.push({ label: 'Диагностика всего тела', value: diagnostics.price });
     r.prices.push({ label: personal.count + ' персональные зарядки', value: personal.price, note: personal.access });
@@ -250,10 +246,6 @@
     r.items = progs.map(function (p) { return '«' + p.title + '»'; });
     r.prices.push({ label: n === 1 ? 'Одна программа' : n + ' программы', value: t.price, note: 'доступ ' + t.access });
     if (n > 1) r.prices.push({ label: 'Одна на выбор', value: kit.tiers[0].price, note: 'доступ ' + kit.tiers[0].access });
-    if (req.extra) {
-      var extra = byId(otherPrograms, req.extra);
-      r.notes.push('Есть и онлайн-программа «' + extra.title + '». ' + extra.priceText + '.');
-    }
     r.notes.push(kit.notes[1]);
     r.prefill.service = kit.title + ' (' + progs.map(function (p) { return p.title; }).join('; ') + ')';
     return r;
@@ -266,8 +258,8 @@
   root.OFFERS = {
     LINKS: LINKS, TERMS: TERMS,
     individual: individual, online: online, diagnostics: diagnostics, personal: personal, kit: kit,
-    otherPrograms: otherPrograms, requests: requests, formats: formats, goals: goals,
+    stretch: stretch, requests: requests, formats: formats, goals: goals,
     goalsFor: goalsFor, recommend: recommend, perUnit: perUnit, fmtRub: fmtRub, byId: byId,
-    source: 'Цены из карточек сообщества «Движение в кайф» ВКонтакте, ноябрь 2026.'
+    source: 'Цены из актуального каталога «Оздоровительный фитнес».'
   };
 })(window);

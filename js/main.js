@@ -1,10 +1,9 @@
-/* «Движение в кайф» — интерактив. Данные и цены только из js/offers-data.js. */
+/* «Оздоровительный фитнес» — интерактив. Данные и цены только из js/offers-data.js. */
 (function () {
   'use strict';
   var O = window.OFFERS;
   if (!O) return;
 
-  var TG_BOT = 'dvizhenie_fitness_bot'; // Telegram-бот «Движение в кайф»
   var reduced = document.documentElement.classList.contains('reduced');
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -101,13 +100,13 @@
     panel.innerHTML =
       '<button class="zone-panel__close" type="button" aria-label="Закрыть подсказку"></button>' +
       '<h3>' + esc(z.name) + '</h3>' +
-      '<p class="zone-panel__k">С чем приходят к Алёне</p><ul class="zone-panel__reqs">' + reqs + '</ul>' +
+      '<p class="zone-panel__k">С чем ко мне приходят</p><ul class="zone-panel__reqs">' + reqs + '</ul>' +
       '<p class="zone-panel__k">Программа в записи</p>' +
       '<p class="zone-panel__prog">«' + esc(prog.title) + '»</p>' +
       '<p class="zone-panel__meta">Из «Фитнес-аптечки»: ' + O.kit.workouts + ' тренировки по ' + O.kit.minutes + ' минут, ' + rub(t1.price) + ' за программу, доступ ' + t1.access + '. Вживую индивидуальные тренировки начинаются с диагностики всего тела — ' + rub(O.diagnostics.price) + '.</p>' +
       '<div class="zone-panel__actions">' +
       '<a class="btn btn--sm" href="#calc-kit" data-zone-prog="' + prog.id + '">Смотреть программу<svg class="btn__i" aria-hidden="true"><use href="#i-corner"/></svg></a>' +
-      '<a class="btn btn--sm btn--ghost" href="#booking" data-zone-ask="' + id + '">Спросить Алёну<svg class="btn__i" aria-hidden="true"><use href="#i-corner"/></svg></a>' +
+      '<a class="btn btn--sm btn--ghost" href="#booking" data-zone-ask="' + id + '">Задать мне вопрос<svg class="btn__i" aria-hidden="true"><use href="#i-corner"/></svg></a>' +
       '</div>';
     var btn = zoneNodes(id).btn;
     panel.setAttribute('data-side', btn.classList.contains('zone-btn--l') ? 'r' : 'l');
@@ -258,10 +257,13 @@
   var ind = O.individual;
   var indScale = $('#ind-scale');
   var indOnline = $('#ind-online');
+  var indPerson = $('#ind-person');
   $('#ind-includes').innerHTML = ind.includes.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
   $('#diag-includes').innerHTML = O.diagnostics.includes.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
   $('#diag-price').textContent = rub(O.diagnostics.price);
   $('#personal-price').textContent = rub(O.personal.price);
+  $('#online-price').textContent = rub(O.online.hour);
+  $$('[data-stretch-price]').forEach(function (n) { n.textContent = rub(O.stretch.price); });
 
   function indN() { var c = indScale.querySelector('input:checked'); return c ? +c.value : 1; }
   function renderIndividual() {
@@ -274,7 +276,7 @@
     indScale.style.setProperty('--p', String((n - 1) / 7));
     setText('ind-total', rub(total));
     setText('ind-each', rub(O.perUnit(total, n)));
-    $('#calc-ind-sub').textContent = online ? 'Онлайн вживую: вы дома, Алёна направляет и корректирует. Один час' : (n === 1 ? 'Лично в Вологде, один час' : 'Лично в Вологде, пакет из ' + n + ' занятий');
+    $('#calc-ind-sub').textContent = online ? 'Онлайн вживую: вы дома, я направляю и корректирую движения. Один час' : (n === 1 ? 'Лично в Вологде, один час' : 'Лично в Вологде, пакет из ' + n + ' занятий');
     var save = $('#ind-save');
     var diff = ind.hour * n - total;
     save.hidden = online || diff <= 0;
@@ -284,10 +286,12 @@
     if (!bonus.hidden) bonus.textContent = 'После 8 занятий: ' + pack.bonus.charAt(0).toLowerCase() + pack.bonus.slice(1) + '.';
     var note = $('#ind-online-note');
     note.hidden = !online;
-    if (online) note.textContent = O.online.discount.text + ' — ' + O.online.discount.note + '. Пакеты в карточках указаны для очных тренировок.';
+    var book = $('#ind-book');
+    book.setAttribute('data-prefill-format', online ? 'online' : 'in_person');
+    book.setAttribute('data-prefill-service', online ? O.online.title : O.individual.title);
   }
   function setIndividual(n, online) {
-    indOnline.checked = !!online;
+    (online ? indOnline : indPerson).checked = true;
     var inp = indScale.querySelector('input[value="' + n + '"]');
     if (inp) inp.checked = true;
     renderIndividual();
@@ -295,6 +299,7 @@
   if (indScale) {
     indScale.addEventListener('change', renderIndividual);
     indOnline.addEventListener('change', renderIndividual);
+    indPerson.addEventListener('change', renderIndividual);
     renderIndividual();
   }
 
@@ -329,8 +334,6 @@
   kitBox.addEventListener('change', renderKit);
   renderKit();
 
-  var sheetKit = $('#sheet-kit-list');
-  if (sheetKit) sheetKit.innerHTML = O.kit.programs.map(function (p) { return '<li>' + esc(p.title) + '</li>'; }).join('');
 
   /* ---------- 6. Листы программ ---------- */
   var sheets = $('#sheets');
@@ -465,7 +468,7 @@
     phoneInput.toggleAttribute('aria-invalid', !!cMsg && mode === 'phone');
     if (cMsg) errs.push({ label: 'способ связи', focus: cFocus });
 
-    setErr(consent.closest('.field'), 'f-consent-err', consent.checked ? '' : 'Нужно согласие, чтобы Алёна могла ответить на заявку.', consent);
+    setErr(consent.closest('.field'), 'f-consent-err', consent.checked ? '' : 'Нужно согласие, чтобы я могла ответить на заявку.', consent);
     if (!consent.checked) errs.push({ label: 'согласие', focus: consent });
 
     var box = $('#form-errors');
@@ -522,12 +525,6 @@
   }
   $('#ticket-new').addEventListener('click', function () { resetForm(); nameInput.focus(); });
 
-  if (TG_BOT) {
-    var tg = $('#contact-tg');
-    tg.hidden = false;
-    tg.querySelector('a').href = 'https://t.me/' + TG_BOT + '?start=trial'; // сразу запись
-  }
-
   /* ---------- Появление, позвонки страницы, таймлайн ---------- */
   var io = 'IntersectionObserver' in window;
   if (io && !reduced) {
@@ -553,7 +550,7 @@
     skIO.observe(skills);
   } else skills.classList.add('is-in');
 
-  var sections = ['top', 'picker', 'prices', 'how', 'about', 'programs', 'booking'].map(function (id) { return document.getElementById(id); });
+  var sections = ['top', 'picker', 'prices', 'how', 'about', 'programs', 'faq', 'booking'].map(function (id) { return document.getElementById(id); });
   var spineLinks = $$('.spine a');
   var navLinks = $$('.site-nav a');
   var vt = $('#vt');
