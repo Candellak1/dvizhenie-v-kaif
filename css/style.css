@@ -100,7 +100,7 @@ html:not([data-demo]) [data-demo] { display: none !important; }
 .site-header::before { content: ""; position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; background: var(--cobalt); transform-origin: left; transform: scaleX(var(--progress, 0)); z-index: 1; }
 .site-header__in { display: flex; align-items: center; gap: 16px; min-height: var(--header-h); }
 .mark { display: inline-flex; flex-direction: column; gap: 2px; text-decoration: none; color: var(--ink); margin-right: auto; }
-.mark__name { font: 400 1.32rem/1 var(--serif); letter-spacing: -.01em; }
+.mark__name { font: 400 1.32rem/1 var(--serif); letter-spacing: -.01em; overflow-wrap: anywhere; }
 .mark__name i { font-style: italic; color: var(--cobalt); font-weight: 380; }
 .mark__sub { font: 400 .7rem/1.2 var(--mono); color: var(--ink-2); }
 
@@ -330,7 +330,7 @@ html:not([data-demo]) [data-demo] { display: none !important; }
   mask-image: radial-gradient(ellipse 70% 80% at 72% 45%, #000 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 70% 80% at 72% 45%, #000 30%, transparent 75%);
 }
-.hero__grid { position: relative; display: flex; flex-direction: column; }
+.hero__grid { position: relative; display: flex; flex-direction: column; container-type: inline-size; }
 .hero__text { display: contents; }
 .hero__title { order: 1; }
 .hero__sub { order: 2; }
@@ -338,9 +338,9 @@ html:not([data-demo]) [data-demo] { display: none !important; }
 .hero__fig { order: 4; margin-top: 18px !important; }
 .hero__quote { order: 5; }
 .hero__trust { order: 6; }
-.hero__title { font-weight: 300; letter-spacing: -.035em; line-height: .9; font-size: clamp(1.65rem, 8.3vw, 4.5rem); }
+.hero__title { font-weight: 300; letter-spacing: -.035em; line-height: .9; font-size: min(7.5vw, 4.5rem); font-size: min(9cqi, 4.5rem); }
 .hero__line { display: block; }
-.hero__line:first-child { width: max-content; }
+.hero__line:first-child { width: fit-content; max-width: 100%; overflow-wrap: anywhere; }
 .hero__line:first-child::after { /* размерная линия под словом */
   content: ""; display: block; height: 11px; margin: .08em 0 .02em;
   border-inline: 1.5px solid var(--cobalt);
@@ -433,7 +433,6 @@ html:not([data-demo]) [data-demo] { display: none !important; }
   .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr); align-items: start; column-gap: clamp(24px, 4vw, 64px); }
   .hero__text { display: flex; flex-direction: column; padding-top: clamp(16px, 4vw, 56px); container-type: inline-size; }
   .hero__text > * { order: 0; }
-  .hero__title { font-size: clamp(1.8rem, 10.1cqi, 4.5rem); }
   .hero__fig { margin-top: 0 !important; }
   .bodymap { --fig-h: min(72svh, 640px); }
   .hero__fig { position: relative; }
@@ -775,15 +774,16 @@ html:not([data-demo]) [data-demo] { display: none !important; }
 .site-footer .mark__sub, .footer__caution, .footer__demo, .ruler__end { color: #c9d3f3 !important; }
 .footer__grid { display: grid; gap: 22px; }
 @media (min-width: 900px) { .footer__grid { grid-template-columns: 1.1fr 1fr 1.3fr; align-items: start; } .footer__demo { grid-column: 1 / -1; } }
-.mark--foot { margin: 0; }
-.mark--foot .mark__name { font-size: clamp(2rem, 1.4rem + 2.6vw, 3.4rem); color: var(--paper); }
+.footer__grid > div:first-child { min-width: 0; container-type: inline-size; }
+.mark--foot { margin: 0; max-width: 100%; }
+.mark--foot .mark__name { font-size: 1.6rem; font-size: min(8.8cqi, 3.4rem); color: var(--paper); }
 .footer__links { display: grid; gap: 2px; }
 .footer__links a { display: inline-flex; min-height: 40px; align-items: center; }
 .footer__caution { margin: 0; font-size: .9rem; color: var(--ink-2); }
 .footer__demo { margin: 0; font: 400 .78rem/1.4 var(--mono); color: var(--ink-2); }
 
 /* ---------- Позвоночник страницы ---------- */
-.spine { position: fixed; z-index: 30; right: 1px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.spine { position: fixed; z-index: 30; right: max(6px, env(safe-area-inset-right)); top: 50%; transform: translateY(-50%); pointer-events: none; }
 .spine ol { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 0; background: rgba(255, 244, 234, .94); }
 .spine ol::before { content: ""; position: absolute; top: 8px; bottom: 8px; left: 50%; width: 1px; background: var(--line); }
 .spine a { position: relative; display: grid; place-items: center; width: 12px; height: 20px; color: var(--ink); }

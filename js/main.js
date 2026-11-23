@@ -566,7 +566,8 @@
   function onScroll() {
     ticking = false;
     var max = document.documentElement.scrollHeight - window.innerHeight;
-    if (header) header.style.setProperty('--progress', max > 0 ? (window.scrollY / max).toFixed(4) : '0');
+    var progress = max > 0 ? Math.max(0, Math.min(1, window.scrollY / max)) : 0;
+    if (header) header.style.setProperty('--progress', progress.toFixed(4));
     var line = window.innerHeight * .4;
     var cur = 0;
     sections.forEach(function (s, i) { if (s && s.getBoundingClientRect().top <= line) cur = i; });
